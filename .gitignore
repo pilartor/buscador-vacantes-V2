@@ -1,0 +1,17 @@
+# Entorno y secretos
+.env
+
+# CV y datos personales
+*.pdf
+_cv_extraido.txt
+
+# Estado y datos generados en runtime
+Data/*.json
+Data/*.db
+Data/*.log
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/

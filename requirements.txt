@@ -1,0 +1,8 @@
+python-jobspy
+langdetect
+pandas
+schedule
+python-dotenv
+requests
+feedparser
+playwright

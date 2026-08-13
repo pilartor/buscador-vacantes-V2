@@ -1,0 +1,64 @@
+name: 🤖 Buscador de Vacantes V2
+
+on:
+  # ── Ejecución manual desde GitHub (el "botón" desde el celular) ──
+  workflow_dispatch:
+
+  # ── Ejecución automática a horarios fijos (hora Argentina = UTC-3) ──
+  schedule:
+    - cron: '0 13 * * 1-5'   # 10:00 AR (lunes a viernes)
+    - cron: '0 18 * * 1-5'   # 15:00 AR (lunes a viernes)
+    - cron: '0 20 * * 1-5'   # 17:00 AR (lunes a viernes)
+
+jobs:
+  buscar-vacantes:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar el código del repositorio
+      - name: 📥 Checkout del repositorio
+        uses: actions/checkout@v4
+
+      # 2. Configurar Python
+      - name: 🐍 Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # 3. Instalar dependencias
+      - name: 📦 Instalar dependencias
+        run: pip install -r requirements.txt
+
+      # 4. Instalar navegador de Playwright (para el conector SPA)
+      - name: 🌐 Instalar chromium de Playwright
+        run: python -m playwright install chromium
+
+      # 5. Restaurar estado (vistos + historial) entre corridas
+      - name: 💾 Restaurar estado (vistos + historial)
+        uses: actions/cache@v4
+        with:
+          path: |
+            Data/vacantes_vistas.json
+            Data/historial.db
+          key: vacantes-estado-${{ github.run_id }}
+          restore-keys: |
+            vacantes-estado-
+
+      # 6. Ejecutar el bot
+      - name: 🚀 Ejecutar buscador de vacantes
+        env:
+          EMAIL_REMITENTE: ${{ secrets.EMAIL_REMITENTE }}
+          EMAIL_DESTINATARIO: ${{ secrets.EMAIL_DESTINATARIO }}
+          EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+        run: python main.py --once
+
+      # 7. Guardar estado actualizado
+      - name: 💾 Guardar estado actualizado
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: |
+            Data/vacantes_vistas.json
+            Data/historial.db
+          key: vacantes-estado-${{ github.run_id }}
