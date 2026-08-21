@@ -10,10 +10,13 @@ on:
     - cron: '0 18 * * 1-5'   # 15:00 AR (lunes a viernes)
     - cron: '0 20 * * 1-5'   # 17:00 AR (lunes a viernes)
 
+concurrency:
+  group: buscador-vacantes-v2
+  cancel-in-progress: false
+
 jobs:
   buscar-vacantes:
     runs-on: ubuntu-latest
-
     steps:
       # 1. Descargar el código del repositorio
       - name: 📥 Checkout del repositorio
